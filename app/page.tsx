@@ -29,6 +29,29 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Player Stats Section */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-xl">
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Level</span>
+            <div className="text-3xl font-extrabold text-indigo-400 mt-1">42</div>
+            <div className="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+              <div className="bg-indigo-500 h-full w-[70%] rounded-full"></div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-xl">
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Achievements</span>
+            <div className="text-3xl font-extrabold text-amber-400 mt-1">128 / 150</div>
+            <p className="text-xs text-slate-500 mt-2">85% Unlocked</p>
+          </div>
+
+          <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-xl">
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Win Rate</span>
+            <div className="text-3xl font-extrabold text-emerald-400 mt-1">68.4%</div>
+            <p className="text-xs text-slate-500 mt-2">Last 50 Matches</p>
+          </div>
+        </section>
       </div>
     </main>
   );
