@@ -1,11 +1,16 @@
 export default function Home() {
+  const games = [
+    { id: 1, title: "Cyberpunk Odyssey", genre: "RPG / Action", status: "Installed", size: "65 GB", color: "from-blue-600 to-indigo-600" },
+    { id: 2, title: "Pixel Arena Legends", genre: "Battle Royale", status: "Update Available", size: "18 GB", color: "from-purple-600 to-pink-600" },
+    { id: 3, title: "Starlight Tactics", genre: "Strategy", status: "Installed", size: "12 GB", color: "from-emerald-600 to-teal-600" },
+  ];
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header / Player Profile Section */}
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            {/* Avatar */}
             <div className="relative">
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-1">
                 <div className="w-full h-full bg-slate-950 rounded-full flex items-center justify-center overflow-hidden">
@@ -15,7 +20,6 @@ export default function Home() {
               <span className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
             </div>
 
-            {/* Profile Details */}
             <div className="flex-1 text-center sm:text-left space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-white">PixelMaster_99</h1>
@@ -50,6 +54,41 @@ export default function Home() {
             <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Win Rate</span>
             <div className="text-3xl font-extrabold text-emerald-400 mt-1">68.4%</div>
             <p className="text-xs text-slate-500 mt-2">Last 50 Matches</p>
+          </div>
+        </section>
+
+        {/* Game Library Section */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white tracking-wide">My Game Library</h2>
+            <span className="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">3 Games</span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {games.map((game) => (
+              <div key={game.id} className="bg-slate-900/80 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex items-center justify-between transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${game.color} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                    {game.title.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{game.title}</h3>
+                    <p className="text-xs text-slate-400">{game.genre} • {game.size}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    game.status === 'Installed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                  }`}>
+                    {game.status}
+                  </span>
+                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-indigo-600/20">
+                    Play
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       </div>
