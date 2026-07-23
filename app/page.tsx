@@ -1,9 +1,35 @@
+'use client';
+
+import { useState } from 'react';
+
 export default function Home() {
+  const [launchingId, setLaunchingId] = useState<number | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+
   const games = [
     { id: 1, title: "Cyberpunk Odyssey", genre: "RPG / Action", status: "Installed", size: "65 GB", color: "from-blue-600 to-indigo-600" },
     { id: 2, title: "Pixel Arena Legends", genre: "Battle Royale", status: "Update Available", size: "18 GB", color: "from-purple-600 to-pink-600" },
     { id: 3, title: "Starlight Tactics", genre: "Strategy", status: "Installed", size: "12 GB", color: "from-emerald-600 to-teal-600" },
   ];
+
+  const handleLaunch = (id: number) => {
+    setLaunchingId(id);
+    setProgress(0);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setLaunchingId(null);
+            setProgress(0);
+          }, 1000);
+          return 100;
+        }
+        return prev + 20;
+      });
+    }, 300);
+  };
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-8">
@@ -66,27 +92,47 @@ export default function Home() {
 
           <div className="grid grid-cols-1 gap-3">
             {games.map((game) => (
-              <div key={game.id} className="bg-slate-900/80 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex items-center justify-between transition-all">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${game.color} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
-                    {game.title.charAt(0)}
+              <div key={game.id} className="bg-slate-900/80 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex flex-col gap-3 transition-all">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${game.color} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                      {game.title.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">{game.title}</h3>
+                      <p className="text-xs text-slate-400">{game.genre} • {game.size}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{game.title}</h3>
-                    <p className="text-xs text-slate-400">{game.genre} • {game.size}</p>
+
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      game.status === 'Installed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    }`}>
+                      {game.status}
+                    </span>
+                    <button 
+                      onClick={() => handleLaunch(game.id)}
+                      disabled={launchingId === game.id}
+                      className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all shadow-lg ${
+                        launchingId === game.id
+                          ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
+                          : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'
+                      }`}
+                    >
+                      {launchingId === game.id ? 'Launching...' : 'Play'}
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    game.status === 'Installed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                  }`}>
-                    {game.status}
-                  </span>
-                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-indigo-600/20">
-                    Play
-                  </button>
-                </div>
+                {/* Progress bar when launching */}
+                {launchingId === game.id && (
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden transition-all">
+                    <div 
+                      className="bg-gradient-to-r from-indigo-500 to-pink-500 h-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
