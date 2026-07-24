@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Game {
   id: string;
@@ -12,22 +12,26 @@ interface Game {
   initials: string;
 }
 
-const GAMES: Game[] = [
+const INITIAL_GAMES: Game[] = [
   { id: "1", title: "Cyberpunk Odyssey", genre: "RPG / Action", size: "65 GB", status: "Installed", color: "bg-blue-600", initials: "C" },
   { id: "2", title: "Pixel Arena Legends", genre: "Battle Royale", size: "18 GB", status: "Update Available", color: "bg-purple-600", initials: "P" },
   { id: "3", title: "Starlight Tactics", genre: "Strategy", size: "12 GB", status: "Installed", color: "bg-emerald-600", initials: "S" },
 ];
 
 export default function Home() {
+  const [games, setGames] = useState<Game[]>(INITIAL_GAMES);
   const [activeTab, setActiveTab] = useState<"overview" | "library" | "stats" | "history">("overview");
   const [launchingId, setLaunchingId] = useState<string | null>(null);
   const [launchProgress, setLaunchProgress] = useState(0);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [updateProgress, setUpdateProgress] = useState(0);
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Play / Launch Game Function
   const handleLaunch = (id: string, title: string) => {
-    if (launchingId || activeGame === id) return;
+    if (launchingId || updatingId || activeGame === id) return;
     setLaunchingId(id);
     setLaunchProgress(0);
 
@@ -42,7 +46,29 @@ export default function Home() {
         }
         return prev + 25;
       });
-    }, 400);
+    }, 300);
+  };
+
+  // Update Game Function
+  const handleUpdate = (id: string, title: string) => {
+    if (updatingId || launchingId) return;
+    setUpdatingId(id);
+    setUpdateProgress(0);
+
+    const interval = setInterval(() => {
+      setUpdateProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setUpdatingId(null);
+          setGames((prevGames) =>
+            prevGames.map((g) => (g.id === id ? { ...g, status: "Installed" } : g))
+          );
+          showToast(`✅ ${title} updated to the latest version!`);
+          return 100;
+        }
+        return prev + 20;
+      });
+    }, 300);
   };
 
   const handleStopGame = (title: string) => {
@@ -55,7 +81,7 @@ export default function Home() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const filteredGames = GAMES.filter(
+  const filteredGames = games.filter(
     (g) =>
       g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       g.genre.toLowerCase().includes(searchQuery.toLowerCase())
@@ -67,7 +93,7 @@ export default function Home() {
 
         {/* Notification Toast */}
         {notification && (
-          <div className="fixed top-5 right-5 bg-indigo-600 text-white px-5 py-3 rounded-lg shadow-lg border border-indigo-400 transition-all z-50">
+          <div className="fixed top-5 right-5 bg-indigo-600 text-white px-5 py-3 rounded-lg shadow-xl border border-indigo-400 transition-all z-50 animate-bounce">
             {notification}
           </div>
         )}
@@ -95,7 +121,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Navigation Tabs (Interactivity Core) */}
+        {/* Navigation Tabs */}
         <nav className="flex items-center gap-2 border-b border-slate-800 pb-2">
           {(["overview", "library", "stats", "history"] as const).map((tab) => (
             <button
@@ -158,6 +184,7 @@ export default function Home() {
               <div className="space-y-3">
                 {filteredGames.map((game) => {
                   const isLaunching = launchingId === game.id;
+                  const isUpdating = updatingId === game.id;
                   const isPlaying = activeGame === game.id;
 
                   return (
@@ -176,18 +203,38 @@ export default function Home() {
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          game.status === "Installed"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                        }`}>
-                          {game.status}
-                        </span>
+                        {/* Interactive Status & Update Button */}
+                        {game.status === "Update Available" ? (
+                          isUpdating ? (
+                            <div className="w-28 bg-slate-800 h-7 rounded-full overflow-hidden border border-amber-500/40 relative flex items-center justify-center">
+                              <div
+                                className="absolute left-0 top-0 bottom-0 bg-amber-600 transition-all duration-200"
+                                style={{ width: `${updateProgress}%` }}
+                              />
+                              <span className="relative z-10 text-[10px] font-bold text-white">
+                                Updating {updateProgress}%
+                              </span>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleUpdate(game.id, game.title)}
+                              className="text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-full font-medium transition cursor-pointer flex items-center gap-1"
+                              title="Click to update game"
+                            >
+                              <span>Update Available</span> 🔄
+                            </button>
+                          )
+                        ) : (
+                          <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">
+                            ✓ Installed
+                          </span>
+                        )}
 
+                        {/* Action Buttons */}
                         {isPlaying ? (
                           <button
                             onClick={() => handleStopGame(game.title)}
-                            className="bg-red-600/80 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-md animate-pulse"
+                            className="bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-md animate-pulse"
                           >
                             Stop Playing
                           </button>
@@ -204,7 +251,12 @@ export default function Home() {
                         ) : (
                           <button
                             onClick={() => handleLaunch(game.id, game.title)}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+                            disabled={game.status === "Update Available" && !isUpdating}
+                            className={`px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-md ${
+                              game.status === "Update Available"
+                                ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                                : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20 active:scale-95"
+                            }`}
                           >
                             Play
                           </button>
